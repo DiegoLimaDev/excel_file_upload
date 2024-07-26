@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div>
+    <p>upload</p>
+  </div>
+  <input id="fileInput" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+
+  <button onclick="preparingData()">aaa</button>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js" integrity="sha512-dlPw+ytv/6JyepmelABrgeYgHI0O+frEwgfnPdXDTOIZz+eDgfW07QXG02/O8COfivBdGNINy+Vex+lYmJ5rxw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+
+  let data = [];
+  let headers = []
+
+  const workbook = new ExcelJS.Workbook()
+  const fileInput = document.getElementById('fileInput')
+  fileInput.addEventListener('change', async () => {
+    const file = await fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const arrayBuffer = reader.result;
+      const data = new Uint8Array(arrayBuffer);
+      await workbook.xlsx.load(data);
+      console.log('complete');
+    };
+    reader.readAsArrayBuffer(file);
+    headers, data = [];
+  })
+
+
+  async function preparingData() {
+
+    const worksheet = await workbook.worksheets[0]
+
+    const rows = await worksheet.getSheetValues();
+
+    await worksheet.getRow(1).eachCell((cell, num) => {
+      headers.push(cell.value)
+    })
+
+    for (let i = 2; i < rows.length; i++){
+
+        const values = rows[i]
+        const obj = {};
+
+        headers.forEach((header, index) => {
+          obj[header] = values[index + 1 ]
+        })
+
+        data.push(obj)
+      }
+      console.log(data);
+  }
+</script>
+</html>
